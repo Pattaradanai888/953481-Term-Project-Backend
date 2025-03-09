@@ -842,7 +842,7 @@ def add_sample_bookmarks(conn, user_id):
                 for recipe_id in recipe_ids[:2]:
                     cur.execute(
                         """
-                        INSERT INTO bookmarks (user_id, recipe_id, folder_id, rating, notes)
+                        INSERT INTO bookmarks (user_id, recipe_id, folder_id, user_rating, notes)
                         VALUES (%s, %s, %s, %s, %s)
                         ON CONFLICT (user_id, recipe_id, folder_id) DO NOTHING
                         """,
@@ -864,7 +864,7 @@ def add_sample_bookmarks(conn, user_id):
                 if len(recipe_ids) >= 5:
                     cur.execute(
                         """
-                        INSERT INTO bookmarks (user_id, recipe_id, folder_id, rating, notes)
+                        INSERT INTO bookmarks (user_id, recipe_id, folder_id, user_rating, notes)
                         VALUES (%s, %s, %s, %s, %s)
                         ON CONFLICT (user_id, recipe_id, folder_id) DO NOTHING
                         """,
