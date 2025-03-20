@@ -4,13 +4,13 @@ from app.extensions import db, jwt, migrate, cache
 import os
 from dotenv import load_dotenv
 
-from .api import auth_bp
+from .api import auth_bp, folder_bp, bookmark_bp
 from .api import search_bp
 
 load_dotenv()
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__ ,static_folder='../static')
     app.config.update(
         SECRET_KEY=os.getenv('SECRET_KEY'),
         SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URL'),
@@ -21,14 +21,21 @@ def create_app():
         JWT_HEADER_TYPE="Bearer",  # Default is "Bearer"
     )
 
-    CORS(app, supports_credentials=True)
+    CORS(app, supports_credentials=True, resources={
+        r"/api/*": {"origins": "http://localhost:3000", "allow_headers": ["Authorization", "Content-Type"]},
+        r"/static/*": {"origins": "http://localhost:3000"}
+    })
     db.init_app(app)
     jwt.init_app(app)
     migrate.init_app(app, db)
     cache.init_app(app)
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
-    app.register_blueprint(search_bp, url_prefix='/api/search')
+    app.register_blueprint(search_bp, url_prefix='/api')
+    app.register_blueprint(folder_bp, url_prefix='/api/folder')
+    app.register_blueprint(bookmark_bp, url_prefix='/api/bookmark')
+
+    app.static_folder = 'static'
 
 
     return app

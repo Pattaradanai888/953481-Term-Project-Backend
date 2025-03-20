@@ -26,7 +26,9 @@ class Recipe(db.Model):
     updated_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
     # Relationships (optional for detailed views)
+    ingredients = db.relationship('RecipeIngredient', backref='recipe', lazy='dynamic')
     instructions = db.relationship('RecipeInstruction', backref='recipe', lazy='dynamic')
+    images = db.relationship('RecipeImage', backref='recipe', lazy='dynamic')
 
     def to_dict(self):
         primary_image = self.images.filter_by(is_primary=True).first()
@@ -35,4 +37,24 @@ class Recipe(db.Model):
             'name': self.name,
             'description': self.description,
             'image_url': primary_image.url if primary_image else None,
+            'category': self.category,
+            'cook_time': self.cook_time,
+            'prep_time': self.prep_time,
+            'total_time': self.total_time,
+            'servings': self.recipe_servings,
+            'yield': self.recipe_yield,
+            'ingredients': [
+                {
+                    'name': ri.ingredient.name,
+                    'quantity': ri.quantity,
+                    'unit': ri.unit,
+                    'preparation_note': ri.preparation_note
+                } for ri in self.ingredients
+            ],
+            'instructions': [
+                {
+                    'step_number': ri.step_number,
+                    'text': ri.instruction_text
+                } for ri in self.instructions.order_by('step_number')
+            ]
         }

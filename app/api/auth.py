@@ -103,9 +103,9 @@ def get_me():
     """Get current user information"""
     try:
         user_id = get_jwt_identity()
-        print(f"JWT Identity extracted: {user_id}")  # Debugging log
+        print("JWT Identity extracted:", repr(user_id))
     except Exception as e:
-        print(f"JWT Error: {str(e)}")  # Debugging log
+        print("JWT Error:", repr(e))
         return jsonify({"error": "Invalid token"}), 401
 
     user = User.query.get(int(user_id))

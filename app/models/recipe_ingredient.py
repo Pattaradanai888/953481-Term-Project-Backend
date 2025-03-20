@@ -9,3 +9,5 @@ class RecipeIngredient(db.Model):
     unit = db.Column(db.String(50))      # e.g., "cups", "tsp"
     preparation_note = db.Column(db.Text)  # e.g., "chopped finely"
     display_order = db.Column(db.Integer, nullable=False, default=0)  # For sorting ingredients in a recipe
+
+    ingredient = db.relationship('Ingredient', backref='recipe_ingredients', lazy='joined')
