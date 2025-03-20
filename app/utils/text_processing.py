@@ -37,15 +37,28 @@ def parse_r_list(text):
 
     text = text.strip()
 
-    # Try faster parsing methods first before regex
     if text.startswith('c(') and text.endswith(')'):
         content = text[2:-1].strip()
-        try:
-            return list(csv.reader(StringIO(content), quotechar='"', skipinitialspace=True, escapechar='\\'))[0]
-        except:
-            pass
+        # Use regex to split on commas outside quotes
+        pattern = re.compile(r',(?=(?:[^"]*"[^"]*")*[^"]*$)')
+        items = []
+        current = ''
+        in_quotes = False
+        for char in content:
+            if char == '"' and not in_quotes:
+                in_quotes = True
+            elif char == '"' and in_quotes:
+                in_quotes = False
+            elif char == ',' and not in_quotes:
+                items.append(current.strip().strip('"'))
+                current = ''
+                continue
+            current += char
+        if current:
+            items.append(current.strip().strip('"'))
+        return [item for item in items if item]
 
-    # JSON parsing is usually fast
+    # Fallback for other formats
     if text.startswith('[') and text.endswith(']'):
         try:
             parsed_json = json.loads(text)
@@ -54,14 +67,12 @@ def parse_r_list(text):
         except:
             pass
 
-    # Simple newline or comma split (much faster than regex for simple cases)
     if '\n' in text:
         return [line.strip().strip('"\'') for line in text.split('\n') if line.strip()]
 
     if ',' in text and 'http' not in text.lower():
         return [item.strip().strip('"\'') for item in text.split(',') if item.strip()]
 
-    # Only use regex for URLs which need special handling
     if 'http' in text.lower():
         url_pattern = re.compile(
             r'https?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+',
@@ -71,11 +82,9 @@ def parse_r_list(text):
         if urls:
             return urls
 
-    # Single quoted string
     if (text.startswith('"') and text.endswith('"')) or (text.startswith("'") and text.endswith("'")):
         return [text[1:-1]]
 
-    # Treat as single unquoted string
     return [text]
 
 
