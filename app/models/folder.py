@@ -3,7 +3,7 @@ from app.extensions import db
 class Folder(db.Model):
     __tablename__ = 'folders'
     folder_id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     cover_url = db.Column(db.String(255))

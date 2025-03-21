@@ -41,6 +41,8 @@ class Recipe(db.Model):
             'cook_time': self.cook_time,
             'prep_time': self.prep_time,
             'total_time': self.total_time,
+            'aggregated_rating': self.aggregated_rating,
+            'review_count': self.review_count,
             'servings': self.recipe_servings,
             'yield': self.recipe_yield,
             'ingredients': [
