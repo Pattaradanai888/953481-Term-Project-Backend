@@ -9,6 +9,8 @@ class Bookmark(db.Model):
     user_rating = db.Column(db.Integer, nullable=False)
     notes = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=db.func.now())
+    updated_at = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp(),
+                           onupdate=db.func.current_timestamp())
 
 
     def to_dict(self):

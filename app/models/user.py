@@ -15,10 +15,10 @@ class User(db.Model):
     last_login = db.Column(db.DateTime, nullable=True)
 
     # Relationships
-    # folders = db.relationship('Folder', backref='user', lazy='dynamic', cascade='all, delete-orphan')
-    # bookmarks = db.relationship('Bookmark', backref='user', lazy='dynamic', cascade='all, delete-orphan')
-    # search_history = db.relationship('SearchHistory', backref='user', lazy='dynamic', cascade='all, delete-orphan')
-    # recommendations = db.relationship('Recommendation', backref='user', lazy='dynamic', cascade='all, delete-orphan')
+    folders = db.relationship('Folder', backref='user', lazy='dynamic')
+    bookmarks = db.relationship('Bookmark', backref='user', lazy='dynamic')
+    recommendations = db.relationship('Recommendation', backref='user', lazy='dynamic')
+    search_history = db.relationship('SearchHistory', backref='user', lazy='dynamic')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

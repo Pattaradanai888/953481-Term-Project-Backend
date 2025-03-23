@@ -1,3 +1,4 @@
+# app/models/recipe.py
 from app.extensions import db
 from sqlalchemy.dialects.postgresql import TSVECTOR
 
@@ -9,26 +10,31 @@ class Recipe(db.Model):
 
     recipe_id = db.Column(db.BigInteger, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
-    author_id = db.Column(db.BigInteger, db.ForeignKey('authors.author_id'))
-    description = db.Column(db.Text)
-    category = db.Column(db.String(255))
-    date_published = db.Column(db.DateTime)
-    cook_time = db.Column(db.BigInteger)
-    prep_time = db.Column(db.BigInteger)
-    total_time = db.Column(db.BigInteger)
-    aggregated_rating = db.Column(db.Double)
-    review_count = db.Column(db.Integer)
-    recipe_servings = db.Column(db.Integer)
-    recipe_yield = db.Column(db.String(255))
-    nutrition_id = db.Column(db.BigInteger, db.ForeignKey('nutrition_info.nutrition_id'))
+    author_id = db.Column(db.BigInteger, db.ForeignKey('authors.author_id'), nullable=True)
+    description = db.Column(db.Text, nullable=True)
+    category = db.Column(db.String(255), nullable=True)  # Note: This might be redundant with categories relationship
+    date_published = db.Column(db.DateTime, nullable=True)
+    cook_time = db.Column(db.BigInteger, nullable=True)
+    prep_time = db.Column(db.BigInteger, nullable=True)
+    total_time = db.Column(db.BigInteger, nullable=True)
+    aggregated_rating = db.Column(db.Float, nullable=True)
+    review_count = db.Column(db.Integer, nullable=True)
+    recipe_servings = db.Column(db.Integer, nullable=True)
+    recipe_yield = db.Column(db.String(255), nullable=True)
+    nutrition_id = db.Column(db.BigInteger, db.ForeignKey('nutrition_info.nutrition_id'), nullable=True)
     search_vector = db.Column(TSVECTOR, nullable=True)
-    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
-    updated_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    created_at = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
+    updated_at = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
 
-    # Relationships (optional for detailed views)
+    # Relationships
     ingredients = db.relationship('RecipeIngredient', backref='recipe', lazy='dynamic')
     instructions = db.relationship('RecipeInstruction', backref='recipe', lazy='dynamic')
     images = db.relationship('RecipeImage', backref='recipe', lazy='dynamic')
+    reviews = db.relationship('Review', backref='recipe', lazy='dynamic')
+    bookmarks = db.relationship('Bookmark', backref='recipe', lazy='dynamic')
+    recommendations = db.relationship('Recommendation', backref='recipe', lazy='dynamic')
+    keywords = db.relationship('Keyword', secondary='recipe_keywords', back_populates='recipes')
+    categories = db.relationship('Category', secondary='recipe_categories', back_populates='recipes')
 
     def to_dict(self):
         primary_image = self.images.filter_by(is_primary=True).first()
@@ -45,6 +51,7 @@ class Recipe(db.Model):
             'review_count': self.review_count,
             'servings': self.recipe_servings,
             'yield': self.recipe_yield,
+            'keywords': [k.name for k in self.keywords],
             'ingredients': [
                 {
                     'name': ri.ingredient.name,
