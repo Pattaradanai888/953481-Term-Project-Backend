@@ -39,11 +39,8 @@ def initialize_bm25_search():
 @jwt_required()
 def search_recipes_bm25():
     """Search recipes using BM25 with spell correction"""
-    global bm25_searcher
-
-    # Ensure BM25 is initialized
-    if bm25_searcher is None:
-        initialize_bm25_search()
+    # Access the pre-initialized BM25 searcher
+    bm25_searcher = current_app.bm25_searcher
 
     # Get query parameter and validate
     query = request.args.get('q', '').strip()
@@ -103,7 +100,3 @@ def search_recipes_bm25():
 
     return jsonify(response), 200
 
-
-def register_bm25(app):
-    """Register BM25 initialization when the app starts"""
-    app.before_first_request(initialize_bm25_search)
