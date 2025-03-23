@@ -7,9 +7,7 @@ import os
 from werkzeug.utils import secure_filename
 from . import folder_bp
 from ..models import Recipe
-from ..services import RecommendServiceOption1, RecommendServiceOption2
-from ..services.recommend_service import RecommendService
-from ..services.recommend_service_new import RecommendServiceNew
+from ..services import RecommendServiceOption2
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 UPLOAD_FOLDER = 'static/uploads'
