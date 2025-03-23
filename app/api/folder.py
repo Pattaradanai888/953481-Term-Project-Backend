@@ -7,6 +7,9 @@ import os
 from werkzeug.utils import secure_filename
 from . import folder_bp
 from ..models import Recipe
+from ..services import RecommendServiceOption1, RecommendServiceOption2
+from ..services.recommend_service import RecommendService
+from ..services.recommend_service_new import RecommendServiceNew
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 UPLOAD_FOLDER = 'static/uploads'
@@ -122,3 +125,15 @@ def delete_folder(folder_id):
     db.session.delete(folder)
     db.session.commit()
     return jsonify({'message': 'Folder deleted successfully'}), 200
+
+
+@folder_bp.route("/<int:folder_id>/suggestions", methods=["GET"])
+@jwt_required()
+def get_folder_suggestions(folder_id):
+    user_id = get_jwt_identity()
+    folder = Folder.query.filter_by(folder_id=folder_id, user_id=user_id).first()
+    if not folder:
+        return jsonify({"error": "Folder not found or not accessible."}), 404
+
+    recommendations = RecommendServiceOption2.generate_folder_suggestions(user_id, folder_id, top_k=10)
+    return jsonify({"suggestions": recommendations}), 200

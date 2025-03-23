@@ -24,6 +24,9 @@ def create_app():
         JWT_TOKEN_LOCATION=["headers"],
         JWT_HEADER_NAME="Authorization",
         JWT_HEADER_TYPE="Bearer",
+        # Flask-Caching configuration
+        CACHE_TYPE='simple',  # Use 'simple' for development (in-memory cache)
+        CACHE_DEFAULT_TIMEOUT=300  # Default timeout of 5 minutes
     )
     print("2. Config loaded")
 
