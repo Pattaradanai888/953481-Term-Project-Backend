@@ -66,15 +66,16 @@ def get_folder(folder_id):
         if recipe:
             recipe_dict = recipe.to_dict()
             recipes.append({
+                'bookmark_id': b.bookmark_id,  # Include bookmark_id here
                 'recipe_id': recipe.recipe_id,
                 'name': recipe.name,
                 'description': recipe.description,
-                'image_url': recipe_dict.get('image_url'),  # Using recipe image_url
+                'image_url': recipe_dict.get('image_url'),
                 'user_rating': b.user_rating
             })
         else:
-            # If recipe isn't found, you might want to handle it differently
             recipes.append({
+                'bookmark_id': b.bookmark_id,
                 'recipe_id': b.recipe_id,
                 'name': f'Recipe {b.recipe_id}',
                 'description': 'Recipe not found',
@@ -86,6 +87,7 @@ def get_folder(folder_id):
         'folder': folder.to_dict(),
         'recipes': recipes
     }), 200
+
 
 
 @folder_bp.route('/<int:folder_id>', methods=['PUT'])
@@ -135,3 +137,41 @@ def get_folder_suggestions(folder_id):
 
     recommendations = RecommendServiceOption2.generate_folder_suggestions(user_id, folder_id, top_k=10)
     return jsonify({"suggestions": recommendations}), 200
+
+
+@folder_bp.route('/<int:folder_id>/bookmark', methods=['GET'])
+@jwt_required()
+def get_folder_bookmarks(folder_id):
+    user_id = get_jwt_identity()
+    # Ensure the folder exists and belongs to the user
+    folder = Folder.query.filter_by(folder_id=folder_id, user_id=user_id).first_or_404()
+
+    # Fetch all bookmarks for the folder for the current user
+    bookmarks = Bookmark.query.filter_by(folder_id=folder_id, user_id=user_id).all()
+
+    bookmarks_list = []
+    for b in bookmarks:
+        # Try to fetch the associated recipe
+        recipe = Recipe.query.filter_by(recipe_id=b.recipe_id).first()
+        if recipe:
+            recipe_dict = recipe.to_dict()
+            bookmark_data = {
+                'bookmark_id': b.bookmark_id,
+                'recipe_id': recipe.recipe_id,
+                'name': recipe.name,
+                'description': recipe.description,
+                'image_url': recipe_dict.get('image_url'),
+                'user_rating': b.user_rating
+            }
+        else:
+            bookmark_data = {
+                'bookmark_id': b.bookmark_id,
+                'recipe_id': b.recipe_id,
+                'name': f'Recipe {b.recipe_id}',
+                'description': 'Recipe not found',
+                'image_url': None,
+                'user_rating': b.user_rating,
+            }
+        bookmarks_list.append(bookmark_data)
+
+    return jsonify({'bookmarks': bookmarks_list}), 200

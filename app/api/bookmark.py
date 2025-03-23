@@ -49,12 +49,13 @@ def create_bookmark():
 @jwt_required()
 def remove_bookmark(bookmark_id):
     user_id = get_jwt_identity()
-    bookmark = Bookmark.query.filter_by(id=bookmark_id, user_id=user_id).first()
+    bookmark = Bookmark.query.filter_by(bookmark_id=bookmark_id, user_id=user_id).first()
     if not bookmark:
         return jsonify({'message': 'Bookmark not found'}), 404
     db.session.delete(bookmark)
     db.session.commit()
     return jsonify({'message': 'Bookmark removed successfully'}), 200
+
 
 @bookmark_bp.route('/<int:bookmark_id>/rating', methods=['PUT'])
 @jwt_required()
