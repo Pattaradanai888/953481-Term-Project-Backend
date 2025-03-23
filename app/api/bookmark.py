@@ -44,3 +44,30 @@ def create_bookmark():
     db.session.add(bookmark)
     db.session.commit()
     return jsonify({'message': 'Bookmark created', 'bookmark': bookmark.to_dict()}), 201
+
+@bookmark_bp.route('/<int:bookmark_id>', methods=['DELETE'])
+@jwt_required()
+def remove_bookmark(bookmark_id):
+    user_id = get_jwt_identity()
+    bookmark = Bookmark.query.filter_by(id=bookmark_id, user_id=user_id).first()
+    if not bookmark:
+        return jsonify({'message': 'Bookmark not found'}), 404
+    db.session.delete(bookmark)
+    db.session.commit()
+    return jsonify({'message': 'Bookmark removed successfully'}), 200
+
+@bookmark_bp.route('/<int:bookmark_id>/rating', methods=['PUT'])
+@jwt_required()
+def update_bookmark_rating(bookmark_id):
+    user_id = get_jwt_identity()
+    new_rating = request.json.get('rating', type=int)
+    if new_rating is None or not (1 <= new_rating <= 5):
+        return jsonify({'message': 'Invalid rating, must be between 1 and 5'}), 400
+
+    bookmark = Bookmark.query.filter_by(id=bookmark_id, user_id=user_id).first()
+    if not bookmark:
+        return jsonify({'message': 'Bookmark not found'}), 404
+
+    bookmark.rating = new_rating
+    db.session.commit()
+    return jsonify({'message': 'Bookmark rating updated successfully'}), 200
